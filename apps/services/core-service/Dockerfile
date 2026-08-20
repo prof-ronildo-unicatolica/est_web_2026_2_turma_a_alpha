@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN pip install --no-cache-dir poetry==1.8.2
 
 # Copia apenas os arquivos de configuracao de dependencias primeiro (cache de layers)
-COPY pyproject.toml poetry.lock poetry.toml ./
+COPY pyproject.toml poetry.toml* poetry.lock* ./
 
 # Instala dependencias (sem venv, direto no sistema do container)
 RUN poetry config virtualenvs.create false \

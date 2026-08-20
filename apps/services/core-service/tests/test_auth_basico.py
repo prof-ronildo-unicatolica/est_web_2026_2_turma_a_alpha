@@ -1,14 +1,45 @@
-"""Testes de fumaca do auth BASICO (placeholder).
+"""Testes da suíte de autenticação real (JWT / Bcrypt / RBAC)."""
 
-Documentam o contrato atual da API de autenticacao. Quando os alunos
-implementarem a versao real (JWT/RBAC) na Sprint 2, estes testes devem
-ser adaptados/substituidos pela suite definitiva da atividade.
-"""
+import pytest
+from app.core.security import get_password_hash
+from app.models.usuario import Usuario
 
 BASE = "/api/v1/auth"
 
 
-def test_login_valido_retorna_token(client):
+@pytest.fixture
+def auth_usuarios(db_session):
+    """Popula os usuários de teste no banco isolado de cada teste."""
+    admin = Usuario(
+        nome="Administrador da Franquia",
+        email="admin@hotel.com",
+        senha_hash=get_password_hash("admin123"),
+        is_admin=True,
+    )
+    cliente = Usuario(
+        nome="Cliente Demonstracao",
+        email="cliente@hotel.com",
+        senha_hash=get_password_hash("cliente123"),
+        is_admin=False,
+    )
+    db_session.add(admin)
+    db_session.add(cliente)
+    db_session.commit()
+    return {"admin": admin, "cliente": cliente}
+
+
+def test_cadastrar_novo_usuario(client, db_session):
+    resp = client.post(
+        f"{BASE}/register",
+        json={"nome": "Novo Usuario", "email": "novo@hotel.com", "senha": "senha123"},
+    )
+    assert resp.status_code == 201
+    body = resp.json()
+    assert body["email"] == "novo@hotel.com"
+    assert "senha" not in body
+
+
+def test_login_valido_retorna_token(client, auth_usuarios):
     resp = client.post(
         f"{BASE}/login", json={"email": "cliente@hotel.com", "senha": "cliente123"}
     )
@@ -18,19 +49,19 @@ def test_login_valido_retorna_token(client):
     assert body["access_token"]
 
 
-def test_login_invalido_retorna_401(client):
+def test_login_invalido_retorna_401(client, auth_usuarios):
     resp = client.post(
         f"{BASE}/login", json={"email": "cliente@hotel.com", "senha": "errada"}
     )
     assert resp.status_code == 401
 
 
-def test_rota_protegida_sem_token_e_bloqueada(client):
+def test_rota_protegida_sem_token_e_bloqueada(client, auth_usuarios):
     resp = client.get(f"{BASE}/me")
     assert resp.status_code in (401, 403)
 
 
-def test_rota_protegida_com_token_retorna_perfil(client):
+def test_rota_protegida_com_token_retorna_perfil(client, auth_usuarios):
     token = client.post(
         f"{BASE}/login", json={"email": "cliente@hotel.com", "senha": "cliente123"}
     ).json()["access_token"]
@@ -39,10 +70,10 @@ def test_rota_protegida_com_token_retorna_perfil(client):
     body = resp.json()
     assert body["email"] == "cliente@hotel.com"
     assert body["is_admin"] is False
-    assert "senha" not in body  # a senha nunca deve vazar na resposta
+    assert "senha" not in body
 
 
-def test_cliente_nao_acessa_rota_admin(client):
+def test_cliente_nao_acessa_rota_admin(client, auth_usuarios):
     token = client.post(
         f"{BASE}/login", json={"email": "cliente@hotel.com", "senha": "cliente123"}
     ).json()["access_token"]
@@ -52,7 +83,7 @@ def test_cliente_nao_acessa_rota_admin(client):
     assert resp.status_code == 403
 
 
-def test_admin_acessa_rota_admin(client):
+def test_admin_acessa_rota_admin(client, auth_usuarios):
     token = client.post(
         f"{BASE}/login", json={"email": "admin@hotel.com", "senha": "admin123"}
     ).json()["access_token"]
