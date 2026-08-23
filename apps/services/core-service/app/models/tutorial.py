@@ -139,4 +139,4 @@ class Linguagem(Base):
     # Relação N:M (Linguagem <-> Tecnologia)
     tecnologias: Mapped[List["Tecnologia"]] = relationship(
         secondary=tecnologia_linguagem, back_populates="linguagens"
-    )
+    ) 
