@@ -1,38 +1,38 @@
-"""Rotas de autenticacao/autorizacao - VERSAO BASICA (placeholder).
+from fastapi import APIRouter, Depends, status
+from sqlalchemy.orm import Session
 
-⚠️ Implementacao simplificada (if/else, sem hash, sem JWT) para o exemplo
-base funcionar. A versao completa e a ATIVIDADE DA SPRINT 2:
-    docs/02_engenharia_software/atividade_auth_sprint2.md
-"""
+from app.api.deps import get_current_admin, get_current_user
+from app.core.database import get_db
+from app.models.usuario import Usuario
+from app.schemas.usuario import LoginRequest, Token, UsuarioCreate, UsuarioPublic
+from app.services.auth_service import AuthService
 
-from fastapi import APIRouter, Depends, HTTPException, status
+router = APIRouter(prefix="/auth", tags=["Autenticação e Segurança"])
 
-from app.api.deps import autenticar_credenciais, get_current_admin, get_current_user
-from app.schemas.usuario import LoginRequest, Token, UsuarioPublic
 
-router = APIRouter(prefix="/auth", tags=["Auth (basico)"])
+@router.post("/register", response_model=UsuarioPublic, status_code=status.HTTP_201_CREATED)
+def cadastrar_usuario(payload: UsuarioCreate, db: Session = Depends(get_db)):
+    """Cadastra um novo cliente na plataforma com a senha criptografada em Bcrypt."""
+    service = AuthService(db)
+    novo_usuario = service.registrar(payload)
+    return novo_usuario
 
 
 @router.post("/login", response_model=Token)
-def login(payload: LoginRequest):
-    """Login basico: valida as credenciais e devolve um 'token'."""
-    usuario = autenticar_credenciais(payload.email, payload.senha)
-    if usuario is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="E-mail ou senha incorretos",
-        )
-    # VERSAO BASICA: o "token" e apenas o e-mail. Na Sprint 2 sera um JWT.
-    return Token(access_token=usuario["email"])
+def login(payload: LoginRequest, db: Session = Depends(get_db)):
+    """Autentica o e-mail e a senha do usuário e retorna o Token JWT real."""
+    service = AuthService(db)
+    usuario = service.autenticar(payload.email, payload.senha)
+    return service.gerar_token(usuario)
 
 
 @router.get("/me", response_model=UsuarioPublic)
-def get_me(usuario_atual: dict = Depends(get_current_user)):
-    """Rota protegida: retorna o perfil do usuario autenticado."""
+def obter_perfil_logado(usuario_atual: Usuario = Depends(get_current_user)):
+    """Rota protegida: Retorna o perfil do usuário logado (exige Token Bearer JWT)."""
     return usuario_atual
 
 
 @router.get("/admin/verificacao")
-def somente_admin(admin: dict = Depends(get_current_admin)):
-    """Rota administrativa de exemplo (autorizacao por is_admin)."""
-    return {"mensagem": f"Acesso administrativo concedido para {admin['nome']}"}
+def verificar_acesso_admin(admin_atual: Usuario = Depends(get_current_admin)):
+    """Rota administrativa de exemplo: Exige que o usuário logado seja is_admin=True."""
+    return {"mensagem": f"Acesso administrativo verificado com sucesso para {admin_atual.nome}"}
