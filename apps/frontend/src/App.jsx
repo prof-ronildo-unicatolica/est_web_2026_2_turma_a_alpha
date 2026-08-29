@@ -13,7 +13,7 @@ export default function App() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/v1/sobre')
+    fetch('/api/v1/sobre')
       .then((res) => {
         if (!res.ok) {
           throw new Error('Falha ao se conectar com a API')
@@ -108,7 +108,7 @@ export default function App() {
         {error && (
           <div className="alert alert-danger shadow-sm p-4" role="alert">
             <h4 className="alert-heading fw-bold">Erro de Conexão com o Backend!</h4>
-            <p>Não foi possível obter os dados da API em <code>http://localhost:8000/api/v1/sobre</code>.</p>
+            <p>Não foi possível obter os dados da API em <code>/api/v1/sobre</code>.</p>
             <p className="mb-0">Verifique se o backend está rodando e se os bancos de dados foram inicializados com sucesso.</p>
             <hr />
             <p className="mb-0 small text-muted">Detalhe do erro: {error}</p>
