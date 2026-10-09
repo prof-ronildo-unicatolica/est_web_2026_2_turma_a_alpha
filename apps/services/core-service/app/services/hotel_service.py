@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 from app.models.hotel import Cidade, Hotel
 from app.repositories.hotel_repository import CidadeRepository, HotelRepository
 
-
 # --- Excecoes de dominio -----------------------------------------------------
 
 
