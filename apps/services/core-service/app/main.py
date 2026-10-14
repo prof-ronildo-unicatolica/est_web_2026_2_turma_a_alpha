@@ -35,10 +35,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 app.include_router(health_router, prefix=settings.API_V1_STR)
 app.include_router(sobre_router, prefix=settings.API_V1_STR)
 app.include_router(auth_router, prefix=settings.API_V1_STR)
 app.include_router(cidades_router, prefix=settings.API_V1_STR)
+app.include_router(hoteis_router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 def read_root():
