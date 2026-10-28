@@ -5,7 +5,11 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.schemas.hotel import HotelCreateSchema, HotelResponseSchema
-from app.services.hotel_service import CidadeNaoEncontradaError, HotelService
+from app.services.hotel_service import (
+    CidadeNaoEncontradaError,
+    HotelService,
+    NomeInvalidoError,
+)
 
 router = APIRouter(prefix="/hoteis", tags=["Hoteis"])
 
@@ -23,6 +27,10 @@ def criar_hotel(
     service = HotelService(db)
     try:
         return service.criar(nome=payload.nome, cidade_id=payload.cidade_id)
+    except NomeInvalidoError as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e)
+        )
     except CidadeNaoEncontradaError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
