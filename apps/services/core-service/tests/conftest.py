@@ -1,3 +1,7 @@
+import os
+
+os.environ.setdefault("MONGODB_URL", "mongodb://teste:teste@localhost:27017")
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
