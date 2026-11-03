@@ -85,9 +85,29 @@ Duplique o arquivo de modelo `env_example` com o nome `.env`:
 
 Após iniciar o servidor, acesse a documentação interativa oficial do Swagger em **`http://localhost:8000/docs`**.
 
+### Geral e Monitoramento
 * **`GET /`**: Rota raiz de boas-vindas.
 * **`GET /api/v1/health`**: Verifica a saúde do sistema e testa ativamente a conexão com o Postgres e MongoDB.
+
+### Sobre e Tutorial Acadêmico
 * **`GET /api/v1/sobre`**: Retorna dados de equipes e relacionamentos complexos do banco (Professor, Disciplina, Stacks, Tecnologias e Linguagens).
+* **`GET /api/v1/sobre/professores/{professor_id}`**: Retorna os dados de um professor específico pelo seu UUID.
+* **`POST /api/v1/sobre/disciplinas`**: Cadastra uma nova disciplina vinculada a um professor e publica evento de auditoria.
+* **`GET /api/v1/debug/error`**: Rota de depuração para simulação de erro interno (`500`).
+
+### Autenticação e Segurança (`/api/v1/auth`)
+* **`POST /api/v1/auth/register`**: Cadastra um novo usuário com senha criptografada em Bcrypt.
+* **`POST /api/v1/auth/login`**: Autentica e-mail e senha do usuário e retorna um Token JWT.
+* **`GET /api/v1/auth/me`**: Rota protegida que retorna o perfil do usuário autenticado (exige Token Bearer JWT).
+* **`GET /api/v1/auth/admin/verificacao`**: Rota protegida administrativa que valida se o usuário possui perfil de administrador (`is_admin=True`).
+
+### Cidades (`/api/v1/cidades`)
+* **`POST /api/v1/cidades`**: Cria uma nova cidade.
+* **`GET /api/v1/cidades`**: Lista todas as cidades cadastradas em ordem alfabética.
+
+### Hotéis (`/api/v1/hoteis`)
+* **`POST /api/v1/hoteis`**: Cria um novo hotel vinculado a uma cidade existente.
+* **`GET /api/v1/hoteis`**: Lista os hotéis cadastrados com os dados da cidade aninhada (suporta filtro opcional por cidade via `?cidade_id=<uuid>`).
 
 ---
 
@@ -98,7 +118,7 @@ Após iniciar o servidor, acesse a documentação interativa oficial do Swagger 
 │   └── versions/             # Histórico de alterações e dados seeds estruturados
 ├── app/
 │   ├── api/
-│   │   └── v1/               # Controladores e Rotas da API (health e sobre)
+│   │   └── v1/               # Controladores e Rotas da API (auth, cidades, health, hoteis e sobre)
 │   ├── core/
 │   │   ├── config.py         # Variáveis e configurações obtidas do .env
 │   │   ├── database.py       # Gerenciamento de conexões com Postgres e MongoDB
