@@ -10,7 +10,9 @@ COPY package.json package-lock.json ./
 RUN npm ci --silent
 
 # Copia o restante do codigo e faz o build de producao
-COPY . .
+COPY index.html ./
+COPY vite.config.js ./
+COPY src/ ./src/
 RUN npm run build
 
 # ─── Stage 2: Serve ──────────────────────────────────────────────────────────
