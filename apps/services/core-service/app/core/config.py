@@ -20,7 +20,7 @@ class Settings(BaseSettings):
         return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
     # Configurações do MongoDB
-    MONGODB_URL: str = "mongodb://admin:admin123@localhost:27017"
+    MONGODB_URL: str
     MONGODB_DB: str = "hotel_mongo_dev"
 
     # Configurações do RabbitMQ

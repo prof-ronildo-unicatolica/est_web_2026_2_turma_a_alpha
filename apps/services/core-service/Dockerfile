@@ -18,8 +18,12 @@ COPY pyproject.toml poetry.toml* poetry.lock* ./
 RUN poetry config virtualenvs.create false \
     && poetry install --no-interaction --no-ansi 
 
-# Copia o restante do codigo
-COPY . .
+# Copia somente o que a aplicacao precisa (sem .env, .git, etc.)
+COPY app/ ./app/
+COPY alembic/ ./alembic/
+COPY alembic.ini ./
+COPY tests/ ./tests/
+COPY ruff.toml ./
 
 EXPOSE 8000
 
